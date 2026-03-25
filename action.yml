@@ -59,7 +59,7 @@ runs:
         }
         trap cleanup EXIT
 
-        curl -fsSL "$DOCKER_DMG_URL" -o "$dmg_path"
+        curl -L "$DOCKER_DMG_URL" -o "$dmg_path"
         sudo hdiutil attach "$dmg_path"
         sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license --user="$USER"
         sudo hdiutil detach "$volume_path"
@@ -80,10 +80,9 @@ runs:
           exit 1
         fi
 
-        echo "DOCKER_APP=$docker_app" >> "$GITHUB_ENV"
-
         for _ in {1..60}; do
-          if open -a "$docker_app"; then
+          if open "$docker_app"; then
+            echo "DOCKER_APP=$docker_app" >> "$GITHUB_ENV"
             exit 0
           fi
           sleep 5
@@ -92,13 +91,13 @@ runs:
         echo "Docker Desktop could not be launched." >&2
         exit 1
 
-    - name: Await Docker readiness
+    - name: Wait for Docker Desktop readiness
       shell: bash
       run: |
         set -euo pipefail
 
         for _ in {1..60}; do
-          if docker desktop status >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+          if docker desktop status && docker info; then
             exit 0
           fi
           sleep 5
