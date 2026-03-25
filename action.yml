@@ -47,22 +47,10 @@ runs:
       run: |
         set -euo pipefail
 
-        work_dir="$(mktemp -d)"
-        dmg_path="$work_dir/Docker.dmg"
-        volume_path="/Volumes/Docker"
-
-        cleanup() {
-          if mount | grep -q "on ${volume_path} "; then
-            sudo hdiutil detach "$volume_path" || true
-          fi
-          rm -rf "$work_dir"
-        }
-        trap cleanup EXIT
-
-        curl -L "$DOCKER_DMG_URL" -o "$dmg_path"
-        sudo hdiutil attach "$dmg_path"
+        curl -L "$DOCKER_DMG_URL" -o Docker.dmg
+        sudo hdiutil attach Docker.dmg
         sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license --user="$USER"
-        sudo hdiutil detach "$volume_path"
+        sudo hdiutil detach /Volumes/Docker
 
     - name: Launch Docker Desktop
       shell: bash
@@ -74,7 +62,7 @@ runs:
           docker_app="$HOME/Applications/Docker.app"
         fi
         if [ ! -d "$docker_app" ]; then
-          echo "Docker.app not found after installation." >&2
+          echo "Docker.app not found." >&2
           ls -la /Applications || true
           ls -la "$HOME/Applications" || true
           exit 1
@@ -82,7 +70,6 @@ runs:
 
         for _ in {1..60}; do
           if open "$docker_app"; then
-            echo "DOCKER_APP=$docker_app" >> "$GITHUB_ENV"
             exit 0
           fi
           sleep 5
@@ -117,9 +104,6 @@ runs:
         docker context ls
         docker buildx version
         docker buildx inspect
-        if [ -n "${DOCKER_APP:-}" ]; then
-          ls -la "$DOCKER_APP"
-        fi
         ls -la /usr/local/bin/docker*
         ls -la "$HOME/.docker/bin" || true
         ls -la "$HOME/.docker/cli-plugins" || true
