@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial public release of the `setup-docker-desktop-macos` action.
 - A composite GitHub Action that installs and starts Docker Desktop on macOS runners.
-- Hosted-runner smoke-test workflows covering `macos-15-intel` and `macos-26-intel`.
+- Validation workflows covering `macos-15-intel` and `macos-26-intel`.
 - Release validation that tests the tagged action before creating the GitHub release.
-- User documentation describing usage, supported runners, and Docker Desktop license responsibility.
+- User documentation describing usage, supported runners, Docker Desktop license responsibility,
+  and the `id-token: write` limitation on GitHub-hosted macOS runners.
+
+### Changed
+
+- Reduced workflow token permissions to avoid a GitHub-hosted macOS startup issue when `id-token: write`
+  is granted.

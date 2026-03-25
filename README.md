@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Set up Docker Desktop
-        uses: gh-workflow/setup-docker-desktop-macos@0.0.1-beta
+        uses: gh-workflow/setup-docker-desktop-macos@0.0.1
         with:
           print_diagnostics: false
 
