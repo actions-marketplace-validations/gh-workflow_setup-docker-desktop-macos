@@ -12,10 +12,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set up Docker Desktop
+    - name: Resolve runner support
       shell: bash
-      env:
-        INPUT_PRINT_DIAGNOSTICS: ${{ inputs.print_diagnostics }}
       run: |
         set -euo pipefail
 
@@ -33,16 +31,21 @@ runs:
 
         case "$(uname -m)" in
           x86_64)
-            docker_dmg_url="https://desktop.docker.com/mac/main/amd64/Docker.dmg"
+            echo "DOCKER_DMG_URL=https://desktop.docker.com/mac/main/amd64/Docker.dmg" >> "$GITHUB_ENV"
             ;;
           arm64)
-            docker_dmg_url="https://desktop.docker.com/mac/main/arm64/Docker.dmg"
+            echo "DOCKER_DMG_URL=https://desktop.docker.com/mac/main/arm64/Docker.dmg" >> "$GITHUB_ENV"
             ;;
           *)
             echo "Unsupported macOS architecture: $(uname -m)" >&2
             exit 1
             ;;
         esac
+
+    - name: Install Docker runtime
+      shell: bash
+      run: |
+        set -euo pipefail
 
         work_dir="$(mktemp -d)"
         dmg_path="$work_dir/Docker.dmg"
@@ -56,10 +59,15 @@ runs:
         }
         trap cleanup EXIT
 
-        curl -fsSL "$docker_dmg_url" -o "$dmg_path"
+        curl -fsSL "$DOCKER_DMG_URL" -o "$dmg_path"
         sudo hdiutil attach "$dmg_path"
         sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license --user="$USER"
         sudo hdiutil detach "$volume_path"
+
+    - name: Launch Docker Desktop
+      shell: bash
+      run: |
+        set -euo pipefail
 
         docker_app="/Applications/Docker.app"
         if [ ! -d "$docker_app" ]; then
@@ -72,26 +80,25 @@ runs:
           exit 1
         fi
 
+        echo "DOCKER_APP=$docker_app" >> "$GITHUB_ENV"
+
         for _ in {1..60}; do
           if open -a "$docker_app"; then
-            break
+            exit 0
           fi
           sleep 5
         done
 
+        echo "Docker Desktop could not be launched." >&2
+        exit 1
+
+    - name: Await Docker readiness
+      shell: bash
+      run: |
+        set -euo pipefail
+
         for _ in {1..60}; do
           if docker desktop status >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-            if [ "$INPUT_PRINT_DIAGNOSTICS" = "true" ]; then
-              which docker
-              docker version
-              docker info
-              docker context ls
-              docker buildx version
-              docker buildx inspect
-              ls -la /usr/local/bin/docker*
-              ls -la "$HOME/.docker/bin" || true
-              ls -la "$HOME/.docker/cli-plugins" || true
-            fi
             exit 0
           fi
           sleep 5
@@ -99,3 +106,21 @@ runs:
 
         echo "Docker Desktop did not become ready in time." >&2
         exit 1
+
+    - name: Print diagnostics
+      if: inputs.print_diagnostics == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        which docker
+        docker version
+        docker info
+        docker context ls
+        docker buildx version
+        docker buildx inspect
+        if [ -n "${DOCKER_APP:-}" ]; then
+          ls -la "$DOCKER_APP"
+        fi
+        ls -la /usr/local/bin/docker*
+        ls -la "$HOME/.docker/bin" || true
+        ls -la "$HOME/.docker/cli-plugins" || true
