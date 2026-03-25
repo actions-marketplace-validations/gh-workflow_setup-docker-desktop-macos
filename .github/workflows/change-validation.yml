@@ -16,3 +16,6 @@ permissions:
 jobs:
   test-suite:
     uses: ./.github/workflows/test-suite.yml
+
+  test-macos-hosted:
+    uses: ./.github/workflows/test-macos-hosted.yml

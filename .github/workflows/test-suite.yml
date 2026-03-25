@@ -26,3 +26,20 @@ jobs:
       - name: Run linters
         run: |
           scripts/lint.sh
+
+      - name: Check `example.yml` only differs by action ref
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          example_main = Path(".github/workflows/example-main.yml").read_text(encoding="utf-8")
+          normalized = example_main.replace(
+              "name: Example Setup Docker Desktop Main",
+              "name: Example Setup Docker Desktop",
+          ).replace(
+              "gh-workflow/setup-docker-desktop-macos@main",
+              "gh-workflow/setup-docker-desktop-macos@0.0.1",
+          )
+          Path("/tmp/example-main.normalized.yml").write_text(normalized, encoding="utf-8")
+          PY
+          diff -u .github/workflows/example.yml /tmp/example-main.normalized.yml

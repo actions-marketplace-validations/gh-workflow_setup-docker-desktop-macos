@@ -1,0 +1,101 @@
+name: Set Up Docker Desktop macOS
+
+description: >
+  Install and start Docker Desktop on macOS GitHub Actions runners.
+
+inputs:
+  print_diagnostics:
+    description: Print Docker and app diagnostics after startup.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Docker Desktop
+      shell: bash
+      env:
+        INPUT_PRINT_DIAGNOSTICS: ${{ inputs.print_diagnostics }}
+      run: |
+        set -euo pipefail
+
+        if [ "$(uname -s)" != "Darwin" ]; then
+          echo "This action only supports macOS runners." >&2
+          exit 1
+        fi
+
+        runner_env="${ImageOS:-}"
+        if [ "$(uname -m)" = "arm64" ] && [ -n "$runner_env" ]; then
+          echo "GitHub-hosted macOS arm64 runners are not supported for Docker Desktop." >&2
+          echo "GitHub currently does not provide nested virtualization on hosted arm64 macOS runners." >&2
+          exit 1
+        fi
+
+        case "$(uname -m)" in
+          x86_64)
+            docker_dmg_url="https://desktop.docker.com/mac/main/amd64/Docker.dmg"
+            ;;
+          arm64)
+            docker_dmg_url="https://desktop.docker.com/mac/main/arm64/Docker.dmg"
+            ;;
+          *)
+            echo "Unsupported macOS architecture: $(uname -m)" >&2
+            exit 1
+            ;;
+        esac
+
+        work_dir="$(mktemp -d)"
+        dmg_path="$work_dir/Docker.dmg"
+        volume_path="/Volumes/Docker"
+
+        cleanup() {
+          if mount | grep -q "on ${volume_path} "; then
+            sudo hdiutil detach "$volume_path" || true
+          fi
+          rm -rf "$work_dir"
+        }
+        trap cleanup EXIT
+
+        curl -fsSL "$docker_dmg_url" -o "$dmg_path"
+        sudo hdiutil attach "$dmg_path"
+        sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license --user="$USER"
+        sudo hdiutil detach "$volume_path"
+
+        docker_app="/Applications/Docker.app"
+        if [ ! -d "$docker_app" ]; then
+          docker_app="$HOME/Applications/Docker.app"
+        fi
+        if [ ! -d "$docker_app" ]; then
+          echo "Docker.app not found after installation." >&2
+          ls -la /Applications || true
+          ls -la "$HOME/Applications" || true
+          exit 1
+        fi
+
+        for _ in {1..60}; do
+          if open -a "$docker_app"; then
+            break
+          fi
+          sleep 5
+        done
+
+        for _ in {1..60}; do
+          if docker desktop status >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+            if [ "$INPUT_PRINT_DIAGNOSTICS" = "true" ]; then
+              which docker
+              docker version
+              docker info
+              docker context ls
+              docker buildx version
+              docker buildx inspect
+              ls -la /usr/local/bin/docker*
+              ls -la "$HOME/.docker/bin" || true
+              ls -la "$HOME/.docker/cli-plugins" || true
+            fi
+            exit 0
+          fi
+          sleep 5
+        done
+
+        echo "Docker Desktop did not become ready in time." >&2
+        exit 1

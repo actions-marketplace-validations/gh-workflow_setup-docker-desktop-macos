@@ -11,12 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial public release of the `action-template` repository template for GitHub Actions.
-- Repository scaffolding for release, change-validation, and test-suite workflows.
-- Python-based linting setup with `pymarkdownlnt` and `yamllint`.
-- A user-facing `README.md` with a pinned action usage example suitable for release validation.
-
-### Changed
-
-- Made the release workflow validate README action references against the current repository owner and name
-  instead of a copied hard-coded source repository reference.
+- Initial public release of the `setup-docker-desktop-macos` action.
+- A composite GitHub Action that installs and starts Docker Desktop on macOS runners.
+- Hosted-runner smoke-test workflows covering `macos-15-intel` and `macos-26-intel`.
+- Release validation that tests the tagged action before creating the GitHub release.
+- User documentation describing usage, supported runners, and Docker Desktop license responsibility.

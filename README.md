@@ -1,32 +1,52 @@
-# action-template
+# setup-docker-desktop-macos
 
-Template repository for creating public GitHub Actions with release workflows, examples, and quality checks
-preconfigured.
+[![Release](https://img.shields.io/github/v/release/gh-workflow/setup-docker-desktop-macos?style=flat-square)](https://github.com/gh-workflow/setup-docker-desktop-macos/releases)
+[![Tests](https://img.shields.io/github/actions/workflow/status/gh-workflow/setup-docker-desktop-macos/change-validation.yml?branch=main&label=test&style=flat-square)](https://github.com/gh-workflow/setup-docker-desktop-macos/actions/workflows/change-validation.yml)
 
-Use this template as the starting point for a new action repo, then replace the placeholder action metadata,
-inputs, outputs, and example workflow with your real implementation.
+Install and start Docker Desktop on macOS GitHub Actions runners.
 
 ## Usage
 
-Update the version in this example to the current release tag when publishing.
-
 ```yaml
+name: ci
+
+on:
+  push:
+
 jobs:
-  example:
-    runs-on: ubuntu-latest
+  docker:
+    runs-on: macos-26-intel
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Run action
-        uses: gh-workflow/action-template@0.0.1
+      - name: Set up Docker Desktop
+        uses: gh-workflow/setup-docker-desktop-macos@0.0.1
         with:
-          example_input: example-value
+          print_diagnostics: false
+
+      - name: Validate Docker
+        run: docker run --rm hello-world
 ```
 
-## Template Checklist
+## Inputs
 
-- Update `action.yml` with the real action name, description, inputs, outputs, and runtime.
-- Replace the usage example in this README with a real example from your action.
-- Add or update test workflows for your action implementation.
-- Keep release references in this README pinned to the current release tag.
+| Name | Required | Description |
+| --- | --- | --- |
+| `print_diagnostics` | no | Print Docker CLI and install diagnostics after Docker Desktop is ready. |
+
+## Supported runners
+
+- GitHub-hosted Intel macOS runners:
+  - `macos-15-intel`
+  - `macos-26-intel`
+- Self-hosted Intel macOS runners
+- Self-hosted arm64 macOS runners
+
+GitHub-hosted macOS arm64 runners are unsupported because GitHub does not support [nested virtualization](https://docs.github.com/en/actions/reference/runners/github-hosted-runners#limitations-for-arm64-macos-runners)
+on them.
+
+## License note
+
+This action runs Docker Desktop's installer with `--accept-license --user="$USER"`. You are responsible for
+complying with Docker's license and subscription terms.
