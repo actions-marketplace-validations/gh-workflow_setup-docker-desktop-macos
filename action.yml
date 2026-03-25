@@ -90,6 +90,8 @@ runs:
           sleep 5
         done
 
+        echo "Final Docker socket state:"
+        ls -l "$HOME/.docker/run" || true
         echo "Docker Desktop did not become ready in time." >&2
         exit 1
 
