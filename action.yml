@@ -3,6 +3,10 @@ name: Setup Docker Desktop macOS
 description: >
   Install and start Docker Desktop on macOS GitHub Actions runners.
 
+branding:
+  icon: download-cloud
+  color: blue
+
 inputs:
   print_diagnostics:
     description: Print Docker and app diagnostics after startup.
