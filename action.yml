@@ -1,4 +1,4 @@
-name: Set Up Docker Desktop macOS
+name: Setup Docker Desktop macOS
 
 description: >
   Install and start Docker Desktop on macOS GitHub Actions runners.
