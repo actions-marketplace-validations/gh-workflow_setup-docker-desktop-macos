@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6] - 2026-03-26
+
+No code changes from `0.0.4`. Released to restore the latest published version after deleting `0.0.5`.
+
 ## [0.0.4] - 2026-03-26
 
 ### Changed
 
 - Renamed the action metadata title to `Setup Docker Desktop macOS` to fix listing on Marketplace.
 - Added Marketplace branding with the `download-cloud` icon and blue color.
-- Refined the README badge set.
 
 ### Fixed
 
