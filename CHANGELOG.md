@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7] - 2026-03-2
+
+### Fixed
+
+- Switched release README tag verification from `rg -P` to `grep -P`.
+
 ## [0.0.6] - 2026-03-26
 
 No code changes from `0.0.4`. Released to restore the latest published version after deleting `0.0.5`.
