@@ -29,9 +29,8 @@ jobs:
         run: |
           set -euo pipefail
           action_ref="${ACTION_OWNER}/${ACTION_REPO}"
-          if rg -n "${action_ref}@(?!${GITHUB_REF_NAME}\\b)" \
-              README.md \
-              -P
+          if grep -nP "${action_ref}@(?!${GITHUB_REF_NAME}\\b)" \
+              README.md
           then
             echo "Found action refs not pinned to ${GITHUB_REF_NAME}" >&2
             exit 1
