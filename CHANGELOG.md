@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.12] - 2026-05-15
+
+### Internal
+
+- Add explicit workflow permissions.
+
+## [0.0.11] - 2026-05-15
+
+### Internal
+
+- Bumped `joshjohanning/ensure-immutable-actions` from `v2.5.3` to `v2.5.4`.
+
+## [0.0.10] - 2026-04-21
+
+### Changed
+
+- Hardened CI by adding a test-suite check that rejects mutable GitHub Action references in workflows.
+
+## [0.0.9] - 2026-04-21
+
+### Changed
+
+- Hardened CI by adding a test-suite check that rejects mutable GitHub Action references in workflows.
+
+## [0.0.8] - 2026-04-20
+
+### Changed
+
+- Hardened CI by adding a test-suite check that rejects mutable GitHub Action references in workflows.
+
 ## [0.0.7] - 2026-03-2
 
 ### Fixed
